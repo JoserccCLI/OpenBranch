@@ -39,8 +39,10 @@ struct OpenBranch {
                 branchSet.insert(branchContent)
             }
         }
+        var branchList = Array(branchSet)
+        branchList = branchList.sorted()
         let chooseBranch = choose("请选择对应的分支\n".f.Blue, type: String.self) { (setting) in
-            for set in branchSet.enumerated() {
+            for set in branchList.enumerated() {
                 setting.addChoice(set.element) { () -> String in
                     return set.element
                 }
