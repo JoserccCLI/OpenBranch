@@ -13,10 +13,7 @@ import SwiftShell
 struct OpenBranch {
     let sdk:Bool
     func open() throws {
-        if !Configuration.isInitSuccess {
-            try self.setup()
-            Configuration.isInitSuccess = true
-        }
+        try self.setup()
         main.currentdirectory = sourcePath()
         try runAndPrint("git", "reset", "--hard")
         try runAndPrint("git", "pull", "origin")
@@ -74,14 +71,14 @@ struct OpenBranch {
     }
     
     func setup() throws {
+        if FileManager.default.fileExists(atPath: "\(gearbestPath())/GearBest2.6.0_9287") {
+            return
+        }
         print("First run? Please perform initial configuration".f.Red)
         let url = ask("Please enter the project Git repository address".f.Blue)
         Configuration.gitSource = url
         try createPath(gearbestPath())
         try createPath(branchsPath())
-        if FileManager.default.fileExists(atPath: "\(gearbestPath())/GearBest2.6.0_9287") {
-            return
-        }
         main.currentdirectory = gearbestPath()
         try runAndPrint("git", "clone", url, "--verbose")
     }
