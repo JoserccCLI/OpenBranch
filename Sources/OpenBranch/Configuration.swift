@@ -8,7 +8,14 @@
 import Foundation
 
 struct Configuration {
-    static var gitSource:String = ""
+    static var gitSource:String {
+        get {
+            UserDefaults.standard.string(forKey: "gitSource") ?? ""
+        } set {
+            UserDefaults.standard.set(newValue, forKey: "gitSource")
+            UserDefaults.standard.synchronize()
+        }
+    }
     static var isInitSuccess:Bool {
         get {
             UserDefaults.standard.bool(forKey: "isInitSuccess")
