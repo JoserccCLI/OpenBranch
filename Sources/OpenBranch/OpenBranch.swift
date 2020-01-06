@@ -71,16 +71,16 @@ struct OpenBranch {
     }
     
     func setup() throws {
-        if FileManager.default.fileExists(atPath: "\(gearbestPath())/GearBest2.6.0_9287") {
-            return
+        if Configuration.gitSource.count == 0 {
+            let url = ask("Please enter the project Git repository address".f.Blue)
+            Configuration.gitSource = url
         }
-        print("First run? Please perform initial configuration".f.Red)
-        let url = ask("Please enter the project Git repository address".f.Blue)
-        Configuration.gitSource = url
-        try createPath(gearbestPath())
-        try createPath(branchsPath())
-        main.currentdirectory = gearbestPath()
-        try runAndPrint("git", "clone", url, "--verbose")
+        if !FileManager.default.fileExists(atPath: "\(gearbestPath())/GearBest2.6.0_9287") {
+            try createPath(gearbestPath())
+            try createPath(branchsPath())
+            main.currentdirectory = gearbestPath()
+            try runAndPrint("git", "clone", Configuration.gitSource, "--verbose")
+        }
     }
     
     func user() -> String {
