@@ -50,6 +50,7 @@ struct OpenBranch {
             try createPath(localBranch)
             main.currentdirectory = localBranch
             try runAndPrint("git", "clone", Configuration.gitSource)
+            try runAndPrint("git", "checkout", chooseBranch)
         }
         let workSpacePath:String
         if !self.sdk {
