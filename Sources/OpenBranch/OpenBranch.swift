@@ -50,6 +50,7 @@ struct OpenBranch {
             try createPath(localBranch)
             main.currentdirectory = localBranch
             try runAndPrint("git", "clone", Configuration.gitSource)
+            main.currentdirectory = "\(localBranch)/GearBest2.6.0_9287"
             try runAndPrint("git", "checkout", chooseBranch)
         }
         let workSpacePath:String
