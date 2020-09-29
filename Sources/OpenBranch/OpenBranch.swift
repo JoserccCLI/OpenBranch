@@ -11,6 +11,15 @@ import SwiftShell
 
 var projectPath:String = ""
 
+enum OpenBranchError : Error {
+    case message(String)
+    var localizedDescription: String {
+        switch self {
+        case .message(let message):
+            return message
+        }
+    }
+}
 
 struct OpenBranch {
     let sdk:Bool
@@ -56,7 +65,7 @@ struct OpenBranch {
             try runAndPrint("git", "checkout", chooseBranch)
         }
         guard let workSpacePath = workSpacePath(local: "\(localBranch)/\(projectPath)") else {
-            assert(false)
+            throw OpenBranchError.message(".xcodeproj or .xcworkspace not exit")
         }
         try runAndPrint("open", workSpacePath, "-a", "Xcode")
     }
@@ -107,12 +116,12 @@ struct OpenBranch {
             assert(url.contains(".git") && url.contains("ssh://"), "请输入ssh://前缀.git后缀的地址")
             Configuration.gitSource = url
         }
-        guard let urlComponment = URLComponents(string: "ssh://git@pineal.ai:30001/pineal-ios/pineal.git") else {
-            assert(false)
+        guard let urlComponment = URLComponents(string: Configuration.gitSource) else {
+            throw OpenBranchError.message("\(Configuration.gitSource) is worning")
         }
         let urlPath = urlComponment.path
         guard let lastPath = urlPath.components(separatedBy: "/").last else {
-            assert(false)
+            throw OpenBranchError.message("\(Configuration.gitSource) is worning")
         }
         /// 获取到工程名称
         projectPath = lastPath.replacingOccurrences(of: ".git", with: "")
