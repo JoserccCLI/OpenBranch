@@ -9,12 +9,14 @@ import Foundation
 import Swiftline
 import SwiftShell
 
+var projectPath:String = ""
+
 
 struct OpenBranch {
     let sdk:Bool
     func open() throws {
         try self.setup()
-        main.currentdirectory = sourcePath()
+        main.currentdirectory = "\(sourcePath())/\(projectPath)"
         try runAndPrint("git", "reset", "--hard")
         try runAndPrint("git", "pull", "origin")
         let branchsString = run("git", "branch", "-a").stdout
@@ -48,18 +50,45 @@ struct OpenBranch {
         let localBranch = "\(branchsPath())/\(chooseBranch)"
         if !FileManager.default.fileExists(atPath: localBranch) {
             try createPath(localBranch)
-            main.currentdirectory = localBranch
+            main.currentdirectory = "\(localBranch)"
             try runAndPrint("git", "clone", Configuration.gitSource)
-            main.currentdirectory = "\(localBranch)/GearBest2.6.0_9287"
+            main.currentdirectory = "\(localBranch)/\(projectPath)"
             try runAndPrint("git", "checkout", chooseBranch)
         }
-        let workSpacePath:String
-        if !self.sdk {
-            workSpacePath = "\(localBranch)/GearBest2.6.0_9287/GearBest/GearBest.xcworkspace"
-        } else {
-            workSpacePath = "\(localBranch)/GearBest2.6.0_9287/GearBest/PrivatePods/PodLib/GGPaySDK/GGPaySDK-developer/GGPaySDK-developer.xcworkspace"
+        guard let workSpacePath = workSpacePath(local: "\(localBranch)/\(projectPath)") else {
+            assert(false)
         }
         try runAndPrint("open", workSpacePath, "-a", "Xcode")
+    }
+    
+    func workSpacePath(local:String) -> String? {
+        if let path = local.components(separatedBy: ".").last, path == "xcodeproj", !local.contains(".swiftpm") {
+            let xcworkspance = local.replacingOccurrences(of: "xcodeproj", with: "xcworkspace")
+            if FileManager.default.fileExists(atPath: xcworkspance) {
+                return xcworkspance
+            }
+            return local
+        }
+        var isDirectory:ObjCBool = ObjCBool(false)
+        guard FileManager.default.fileExists(atPath: local, isDirectory: &isDirectory) else {
+            return nil
+        }
+        if isDirectory.boolValue {
+            guard let contents:[String] = try? FileManager.default.contentsOfDirectory(atPath: local) else {
+                return nil
+            }
+            var file:String?
+            for item in contents {
+                let itemPath = "\(local)/\(item)"
+                if let path = workSpacePath(local: itemPath) {
+                    file = path
+                    break
+                }
+            }
+            return file
+        } else {
+            return nil
+        }
     }
     
     func filterBranchContent(_ content:String) -> String {
@@ -75,12 +104,24 @@ struct OpenBranch {
     func setup() throws {
         if Configuration.gitSource.count == 0 {
             let url = ask("Please enter the project Git repository address".f.Blue)
+            assert(url.contains(".git") && url.contains("ssh://"), "请输入ssh://前缀.git后缀的地址")
             Configuration.gitSource = url
         }
-        if !FileManager.default.fileExists(atPath: "\(gearbestPath())/GearBest2.6.0_9287") {
-            try createPath(gearbestPath())
-            try createPath(branchsPath())
-            main.currentdirectory = gearbestPath()
+        guard let urlComponment = URLComponents(string: "ssh://git@pineal.ai:30001/pineal-ios/pineal.git") else {
+            assert(false)
+        }
+        let urlPath = urlComponment.path
+        guard let lastPath = urlPath.components(separatedBy: "/").last else {
+            assert(false)
+        }
+        /// 获取到工程名称
+        projectPath = lastPath.replacingOccurrences(of: ".git", with: "")
+        try createPath(projectCachePath())
+        try createPath("\(projectCachePath())/\(projectPath)")
+        try createPath(branchsPath())
+        try createPath(sourcePath())
+        main.currentdirectory = sourcePath()
+        if !FileManager.default.fileExists(atPath: "\(sourcePath())/\(projectPath)") {
             try runAndPrint("git", "clone", Configuration.gitSource, "--verbose")
         }
     }
@@ -89,16 +130,16 @@ struct OpenBranch {
         return main.env["USER"] ?? ""
     }
     
-    func gearbestPath() -> String {
-        return "/Users/\(user())/Library/Caches/GearBest"
+    func projectCachePath() -> String {
+        return "/Users/\(user())/Library/Caches/OpenBranch"
     }
     
     func branchsPath() -> String {
-        return "\(gearbestPath())/Branchs"
+        return "\(projectCachePath())/\(projectPath)/Branchs"
     }
     
     func sourcePath() -> String {
-        return "\(gearbestPath())/GearBest2.6.0_9287"
+        return "\(projectCachePath())/\(projectPath)/Source"
     }
     
     func createPath(_ path:String) throws {

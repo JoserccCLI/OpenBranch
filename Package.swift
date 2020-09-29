@@ -10,9 +10,9 @@ let package = Package(
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
-        .package(url: "https://github.com/JoserccCLI/Swiftline", from: "0.6.0"),
-        .package(url: "https://github.com/kylef/Commander", from: "0.9.1"),
-        .package(url: "https://github.com/kareman/SwiftShell", from: "5.0.1")
+        .package(path: "./SPM/Swiftline"),
+        .package(path: "./SPM/Commander"),
+        .package(path: "./SPM/SwiftShell")
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
