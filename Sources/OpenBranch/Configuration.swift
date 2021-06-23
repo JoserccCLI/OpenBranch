@@ -6,22 +6,27 @@
 //
 
 import Foundation
+/// 工程配置
+struct Configuration: Codable {
+    let sourceURL:String
+    let name:String
+}
 
-struct Configuration {
-    static var gitSource:String {
-        get {
-            UserDefaults.standard.string(forKey: "gitSource") ?? ""
-        } set {
-            UserDefaults.standard.set(newValue, forKey: "gitSource")
-            UserDefaults.standard.synchronize()
+class ConfigurationManager {
+    @UserDefaultValue(key: "open_branch_configuration")
+    var data:Data?
+    static let manager = ConfigurationManager()
+    
+    func get() -> [Configuration] {
+        guard let data = self.data,
+              let configurations = try? JSONDecoder().decode([Configuration].self, from: data) else {
+            return []
         }
+        return configurations
     }
-    static var isInitSuccess:Bool {
-        get {
-            UserDefaults.standard.bool(forKey: "isInitSuccess")
-        } set {
-            UserDefaults.standard.set(newValue, forKey: "isInitSuccess")
-            UserDefaults.standard.synchronize()
-        }
+    
+    func set(configurations:[Configuration]) throws {
+        let data = try JSONEncoder().encode(configurations)
+        self.data = data
     }
 }
