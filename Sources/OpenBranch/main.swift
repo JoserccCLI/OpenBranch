@@ -1,6 +1,5 @@
 import Foundation
 import ArgumentParser
-import Logging
 import SwiftShell
 
 struct OpenBranch:ParsableCommand {
