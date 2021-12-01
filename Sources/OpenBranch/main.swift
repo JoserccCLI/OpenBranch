@@ -43,6 +43,8 @@ struct OpenBranch:ParsableCommand {
         if SwiftShell.main.currentdirectory != HEADBranchPath {
             SwiftShell.main.currentdirectory = HEADBranchPath
         }
+        /// 删除远程已经不存在的分支
+        try SwiftShell.runAndPrint("git", "remote","prune","origin")
         let allBranch:[String] = SwiftShell.run("git", "branch", "-a").stdout.components(separatedBy: "\n").compactMap({ element in
             let paths = element.components(separatedBy: "/")
             guard paths.count == 3 else {
