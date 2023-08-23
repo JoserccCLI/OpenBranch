@@ -69,9 +69,11 @@ struct OpenBranch:ParsableCommand {
             SwiftShell.main.currentdirectory = branchPath
             try runAndPrint("git", "checkout", branchName)
         }
+        print("正在打开项目:\(branchPath)")
         let shellFile = "\(branchPath)/open_branch.sh"
         if !FileManager.default.fileExists(atPath: shellFile) {
-            throw CleanExit.message("\(shellFile)文件不存在")
+            print("不存在\(shellFile),正在创建")
+            FileManager.default.createFile(atPath: shellFile, contents: openBrachSh.data(using: .utf8))
         }
         if SwiftShell.main.currentdirectory != branchPath {
             SwiftShell.main.currentdirectory = branchPath
@@ -91,3 +93,8 @@ struct OpenBranch:ParsableCommand {
 
 OpenBranch.main()
 
+
+let openBrachSh = """
+#!/bin/bash
+open ./ -a Visual\\ Studio\\ Code.app
+"""
