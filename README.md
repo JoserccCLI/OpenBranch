@@ -13,3 +13,22 @@ brew install mint
 ```
 mint install JoserccCLI/OpenBranch@master openb
 ````
+
+### use openb
+
+#### openb
+```
+openb
+```
+
+#### add
+
+```
+open add
+```
+
+### remove
+
+```
+openb remove
+```
