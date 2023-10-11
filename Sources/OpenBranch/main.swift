@@ -38,7 +38,7 @@ struct OpenBranch:ParsableCommand {
         } else {
             SwiftShell.main.currentdirectory = HEADBranchPath
             try runAndPrint("git", "reset", "--hard")
-            try runAndPrint("git", "pull", "--ff-only")
+            try runAndPrint("git", "fetch", "--all")
         }
         if SwiftShell.main.currentdirectory != HEADBranchPath {
             SwiftShell.main.currentdirectory = HEADBranchPath
